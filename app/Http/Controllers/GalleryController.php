@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Resource;
 use App\Gallery;
 use App\ResourceGallery;
+use App\HotspotType;
 
 class GalleryController extends Controller
 {
@@ -15,9 +16,7 @@ class GalleryController extends Controller
         $this->middleware('auth')->except("getImagesFromGallery");
     }
 
-    /**
-     * METODO PARA MOSTRAR LA VISTA PRINCIPAL DE GALERIAS
-     */
+    /* METODO PARA MOSTRAR LA VISTA PRINCIPAL DE GALERIAS */
     public function index()
     {
         $gallery = Gallery::all();
@@ -27,9 +26,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA GUARDAR UNA NUEVA GALERIA EN LA BASE DE DATOS
-     */
+    /* METODO PARA GUARDAR UNA NUEVA GALERIA EN LA BASE DE DATOS */
     public function store(Request $request){
         $v = \Validator::make($request->all(), [
             'titleadd' => 'required',
@@ -48,9 +45,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA GUARDAR RECURSOS EN UNA GALERIA 
-     */
+    /* METODO PARA GUARDAR RECURSOS EN UNA GALERIA */
     public function save_resource($idG, $idR){
         $recurso = new ResourceGallery();
         $recurso->resource_id=$idR;
@@ -60,9 +55,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA ELIMINAR RECURSOS DE UNA GALERIA
-     */
+    /* METODO PARA ELIMINAR RECURSOS DE UNA GALERIA */
     public function delete_resource($idG, $idR){
         $recurso = ResourceGallery::where('gallery_id', '=' ,$idG)->where('resource_id' , '=', $idR)->get();
         for($i=0; $i<count($recurso); $i++){
@@ -72,9 +65,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA MOSTRAR LA VISTA DE EDICIÓN DE UNA GALERIA
-     */
+    /* METODO PARA MOSTRAR LA VISTA DE EDICIÓN DE UNA GALERIA */
     public function edit($id){
         $gallery = Gallery::find($id);
         $data["gallery"] = $gallery;
@@ -83,9 +74,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * 
-     */
+    /*     */
     public function edit_resources($id, $resultado=null){
         $gallery = Gallery::find($id);
         $data["gallery"] = $gallery;
@@ -107,9 +96,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA ACTUALIZAR UNA GALERIA DE IMAGENES
-     */
+    /* METODO PARA ACTUALIZAR UNA GALERIA DE IMAGENES */
     public function update(Request $request, $id){
         $gallery = Gallery::find($id);
         $gallery->fill($request->all());
@@ -122,9 +109,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA ACTUALIZAR LOS RECURSOS DE UNA GALERIA DE IMAGENES
-     */
+    /* METODO PARA ACTUALIZAR LOS RECURSOS DE UNA GALERIA DE IMAGENES */
     public function update_resources(Request $request, $id)
     {
         $gallery = Gallery::find($id);
@@ -136,9 +121,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA COMPROBAR SI TIENE DATOS LA GALERIA A ELIMINAR
-     */
+    /* METODO PARA COMPROBAR SI TIENE DATOS LA GALERIA A ELIMINAR */
     public function contenido($id)
     {
         $relacion = ResourceGallery::where("gallery_id", $id)->get();
@@ -153,9 +136,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA ELIMINAR UNA GALERIA DE IMAGENES
-     */
+    /* METODO PARA ELIMINAR UNA GALERIA DE IMAGENES */
     public function destroy($id)
     {
         $gallery = Gallery::find($id);
@@ -164,13 +145,23 @@ class GalleryController extends Controller
             $relacion[$i]->delete();
         }
         $gallery->delete();
+    // Modificar el ID_TYPE para que vuelva a -1, indicando que esta vacío.
+        $hotspot = HotspotType::where("id_type", $id)->get();
+        $ht = HotspotType::find($hotspot[0]->id);
+        $ht -> id_type = -1;
+        
+        if($ht->save()){
+            return response()->json(['status' => true]);
+        }else{
+            return response()->json(['status' => false]);
+        }        
     }
+
+    
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA OBTENER LAS IMAGENES DE UNA GALERIA DE IMAGENES
-     */
+    /* METODO PARA OBTENER LAS IMAGENES DE UNA GALERIA DE IMAGENES */
     public function getImagesFromGallery($galleryId){
         $gallery = Gallery::find($galleryId);
         $images = $gallery->resources()->get();
@@ -179,9 +170,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
 
-    /**
-     * METODO PARA RECUPERAR TODAS LAS GALERIAS DE IMAGENES
-     */
+    /* METODO PARA RECUPERAR TODAS LAS GALERIAS DE IMAGENES */
     public function getAllGalleries(){
         $galleries = Gallery::all();
         return response()->json($galleries);
@@ -189,9 +178,7 @@ class GalleryController extends Controller
 
     //---------------------------------------------------------------------------------------
     
-    /**
-     * METODO PARA BUSCAR IMAGENES A TRAVES DE UNA CLAVE ENTRE LOS RECURSOS
-     */
+    /* METODO PARA BUSCAR IMAGENES A TRAVES DE UNA CLAVE ENTRE LOS RECURSOS */
     public function buscador(Request $request){
         $resources = Resource::where('title', 'like', $request->texto.'%')
         ->orWhere('description', 'like',"%".$request->texto."%")->get();

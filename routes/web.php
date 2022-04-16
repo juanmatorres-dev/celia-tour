@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,6 +42,8 @@ Route::resource('guidedVisit', 'GuidedVisitController')->except([
 
 /////////////// RESTfull Recursos ////////////////
 Route::post('resources/deleteSubtitle', 'ResourceController@deleteSubtitle')->name('resource.deleteSubtitle');
+Route::post('resources/getmodel3d', 'ResourceController@getModel3D')->name('resource.getmodel3d');
+Route::get('resources/getnamemodel3d/{id}', 'ResourceController@getNameModel3D')->name('resource.getnamemodel3d');
 Route::post('resources/getvideos', 'ResourceController@getVideos')->name('resource.getvideos');
 Route::post('resources/getaudios', 'ResourceController@getAudios')->name('resource.getaudios');
 Route::get('resources/getroute/{id}', 'ResourceController@getRoute')->name('resource.getroute');
@@ -60,12 +64,25 @@ Route::post('zone/{id}/delete', 'ZoneController@destroy')->name('zone.delete');
 Route::post('zone/{id}/checkScenes', 'ZoneController@checkScenes')->name('zone.checkScenes');
 Route::resource('zone', 'ZoneController');
 Route::get('zone/position/update/{opc}', 'ZoneController@updatePosition')->name('zone.updatePosition');
+Route::post('zone/position/update/{id}', 'ZoneController@zonesPosition')->name('zone.zonesPosition');
+
+/**
+ * Giro de imagenes de las zonas
+ */
+//Route::get('rotate-image', array('as'=> 'rotate.image', 'uses' => 'ImageController@rotateImage'));
+//Route::post('rotate-image-store', array('as'=> 'rotate.image.store', 'uses' => 'ImageController@rotateImageStore'));
+//Route::post('zone', 'ImageController@rotateImage')->name('zone.rotateImage');
+
+Route::post('zone/rotate/{filename}', 'ImageController@rotateImageStore')->name('zone.rotateImageStore');
+//Route::get('zone/rotate/{filename}', 'ImageController@rotateImageStore')->name('zone.rotateImageStore');
 
 /////////////// RESTfull Scene ////////////////
 Route::put('scene/{id}/update', 'SceneController@update')->name("scene.update");
 Route::get('scene/show/{id}', 'SceneController@show')->name("scene.show");
 Route::post('scene/{id}/checkSs', 'SceneController@checkSecondaryScenes')->name("scene.checkSs");
 Route::post('scene/{id}/checkHotspots', 'SceneController@checkHotspots')->name("scene.checkHotspots");
+Route::post('scene/{id}/checkScenes_guided_visits', 'SceneController@checkScenes_guided_visits')->name("scene.checkScenes_guided_visits");
+Route::post('scene/{id}/checkHighlights', 'SceneController@checkHighlights')->name("scene.checkHighlights");
 Route::post('scene/{id}/checkStatus', 'SceneController@checkStatus')->name("scene.checkStatus"); //Comprobar si es escena principal o cover
 Route::resource('scene', 'SceneController');
 Route::post('scene/setViewDefault/{scene}', 'SceneController@setViewDefault')->name("scene.setViewDefault");
@@ -109,6 +126,7 @@ Route::post('highlight/{id}/show', 'HighlightController@show')->name('highlight.
 Route::get('highlight/index/{id}', 'HighlightController@index');
 Route::get('highlight/delete/{id}', 'HighlightController@destroy')->name('highlight.borrar');
 Route::get('highlight/position/update/{opc}', 'HighlightController@updatePosition')->name('highlight.updatePosition');
+Route::post('highlight/position/update/{id}', 'HighlightController@highlightPosition')->name('highlight.highlightPosition');
 
 /////////////// RESTfull Portkey ////////////////
 Route::post('portkey/getScenes/{id}', 'PortkeyController@getScenes')->name('portkey.getScenes');

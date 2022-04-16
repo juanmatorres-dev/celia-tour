@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Resource;
 use App\ResourceGallery;
 use App\SceneGuidedVisit;
+use App\HotspotType;
 use Intervention\Image\ImageManagerStatic;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
@@ -82,6 +83,8 @@ class ResourceController extends Controller
                 $ext="image";
             }elseif($extension == ".pdf"){
                 $ext="document";
+            }elseif($extension == ".glb"){
+                $ext="model3D";
             }elseif($extension == ".mp3" || $extension == ".wav" ){
                 $ext="audio";
             }
@@ -139,7 +142,7 @@ class ResourceController extends Controller
         if($request->hasFile('subt')){
 
             //Crear un nombre para almacenar el fichero
-            $extension = explode( '.', $request->file('subt')->getClientOriginalName()); 
+            $extension = explode( '.', $request->file('subt')->getClientOriginalName());
             if(count($extension)<3){
                 $correctFile=false;
             }else{
@@ -156,12 +159,12 @@ class ResourceController extends Controller
 
         $resource = Resource::find($id);
         $resource->fill($request->all());
-        if($resource->save() && $correctFile){   
+        if($resource->save() && $correctFile){
             return response()->json(['status'=> true, 'nameSubt'=>$nameSubt]);
         }else{
             //Enviar error con un codigo para identificar la causa
             if(!$correctFile){
-                return response()->json(['status'=> false, 'errorCode'=>1]);    
+                return response()->json(['status'=> false, 'errorCode'=>1]);
             }else{
                 return response()->json(['status'=> false, 'errorCode'=>0]);
             }
@@ -177,7 +180,7 @@ class ResourceController extends Controller
         $resource = Resource::find($id);
         $relacion = ResourceGallery::where("resource_id", $id)->get();
         $visitaGuiada = SceneGuidedVisit::where("id_resources", $id)->get();
-        
+
         $contVG = count($visitaGuiada);
         $contR = count($relacion);
 
@@ -187,6 +190,18 @@ class ResourceController extends Controller
                 unlink(public_path("img/resources/miniatures/").$resource->route);
             }
             $resource->delete();
+
+        // Modificar el ID_TYPE para que vuelva a -1, indicando que esta vacío.
+        $hotspot = HotspotType::where("id_type", $id)->get();
+        $ht = HotspotType::find($hotspot[0]->id);
+        $ht -> id_type = -1;
+
+        if($ht->save()){
+            return response()->json(['status' => true]);
+        }else{
+            return response()->json(['status' => false]);
+        }
+
             return response()->json(['status'=> true]);
         }else{
             return response()->json(['status'=> false, 'guidedVisit' => $contVG, 'resourceGallery' => $contR]);
@@ -194,7 +209,7 @@ class ResourceController extends Controller
     }
 
     //--------------------------------------------------------
-    
+
     /*
      * METODO PARA ELIMINAR UN SUBTITULO
      */
@@ -221,6 +236,29 @@ class ResourceController extends Controller
     //-------------------------------------------------------
 
     /**
+     * METODO PARA OBTENER LOS MODELOS ALMACENADOS EN LA BASE DE DATOS
+     */
+    public function getModel3D(){
+        $resources = Resource::where('type','model3D')->get();
+        return response()->json($resources);
+    }
+
+    /**
+     * METODO PARA OBTENER EL NOMBRE DEL MODELO 3D ALMACENADO EN UN HOTSPOT
+     */
+    public function getNameModel3D($id){
+        $name = DB::select(DB::raw("SELECT id_type, title FROM hotspot_types
+        INNER JOIN resources
+        ON hotspot_types.id_type = resources.id
+        WHERE id_type = $id"));
+        $name = $name[0]->title;
+        //return response()->json($name);
+        echo $name;
+    }
+
+    //--------------------------------------------------------
+
+    /**
      * METODO PARA OBTENER LOS AUDIOS ALMACENADOS EN LA BASE DE DATOS
      */
     public function getAudios(){
@@ -229,7 +267,7 @@ class ResourceController extends Controller
     }
 
     //--------------------------------------------------------
-    
+
     /*
      * METODO PARA OBTENER LA RUTA DE UN RECURSO
      */
@@ -248,7 +286,7 @@ class ResourceController extends Controller
     //---------------------------------------------------------------------------------------
 
     /**
-    * METODO PARA BUSCAR ELEMENTOS DENTRO DE RECURSOS CON UNA CLAVE 
+    * METODO PARA BUSCAR ELEMENTOS DENTRO DE RECURSOS CON UNA CLAVE
     */
     public function buscador(Request $request){
         $resources = Resource::where('title', 'like', $request->texto.'%')

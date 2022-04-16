@@ -60,7 +60,7 @@
                 <label for="name">Name</label>
                 <input id="name" type="text" name="name" required><br><br>
                 <label for="file_image">File Image</label>
-                <input id="file_image" type="file" name="file_image" required><br><br>
+                <input id="file_image" type="file" name="file_image" required accept=".png, .jpg, .jpeg"><br><br>
             </form>
         </div>
     </div>
@@ -74,6 +74,7 @@
 @endsection
 
 @section('content')
+
 <!-- TITULO -->
 <div id="title" class="col80 xlMarginBottom">
     <span>ZONAS ({{ $numberOfZones }})</span>
@@ -91,12 +92,6 @@
 </div>
 
 
-<!-- Formulario para guardar posición de ZONAS-->
-<form id="addPosition" action="{{ route('zone.updatePosition', ['opc' => 'd']) }}" method="post">
-    @csrf
-    <!-- Por defecto null, para saber si mandar petición al servidor -->
-    <input id="position" type="text" name="position" value="null" style="width: 500px;">
-</form>
 
 
 <div id="content" class="col100 centerH">
@@ -104,23 +99,34 @@
         <div class="col100 mPaddingLeft mPaddingRight mPaddingBottom">
             <div class="col30"><strong>Nombre</strong></div>
             <div class="col15"><strong>Imagen</strong></div>
-            <div class="col15"><strong>Posición</strong></div>
+            <div class="col15"><strong>Nº de escenas</strong></div>
         </div>
 
         <div class="sortable">
             @php
             $count = 1;
             @endphp
-            @foreach ($zones as $zone)
+            
+           
 
+            @foreach ($zones as $zone)
+           
             <div id="zone{{ $zone->id }}" class="col100 mPadding">
                 <div class="col30 row15">{{ $zone->name }}</div>
                 <div class="col15 row15"> <img src="{{ url('img/zones/miniatures/'.$zone->file_miniature) }}" alt='file_miniature'> </div>
-                <div class="col15 row15">{{ $zone->position }}</div>
+                <div class="col15 row15"> 
+                        
+                        {{ $num_scenes[$count - 1]->num_scenes }}
+                        
+                    </div>
                 <div class="col15 row15"> <input type="button" value="Editar" class="col80" onclick="window.location.href='{{ route('zone.edit', $zone->id) }}'"> </div>
                 <div class="col15 row15"> <input id="{{ $zone->id }}" type="button" value="Eliminar" class="col80 delete"> </div>
-                <!-- Comprueba si hay solo una zona, y si es así no muestra la flecha de ordenar -->
-                @if($numberOfZones > 1)
+
+                <!--
+                    COMENTADO EL CÓDIGO DE ORDENACIÓN POR FLECHAS
+
+                Comprueba si hay solo una zona, y si es así no muestra la flecha de ordenar 
+                    @if($numberOfZones > 1)
                 @if($count == 1)
                 <div class="pointer col5 row15"> <img id="d{{ $zone->position }}" src="{{ url('img/icons/down.png') }}" width="18px" onclick="window.location.href='{{ route('zone.updatePosition', ['opc' => 'd'.$zone->id]) }}'"> </div>
                 @else
@@ -130,20 +136,29 @@
                 <div class="pointer col5 row15"> <img id="u{{ $zone->position }}" src="{{ url('img/icons/up.png') }}" width="18px" onclick="window.location.href='{{ route('zone.updatePosition', ['opc' => 'u'.$zone->id]) }}'"> </div>
                 <div class="pointer col5 row15"> <img id="d{{ $zone->position }}" src="{{ url('img/icons/down.png') }}" width="18px" onclick="window.location.href='{{ route('zone.updatePosition', ['opc' => 'd'.$zone->id]) }}'"> </div>
                 @endif
+                @endif   
                 @endif
-                @php
-                $count++;
-                @endphp
-                @endif
-
+                -->
+                    @php
+                    $count++;
+                    @endphp
             </div>
+            
             @endforeach
         </div>
     </div>
 
 </div>
 
-
+<!-- Formulario para guardar posición de ZONAS-->
+<!-- Enviar el id                                           aquí -->
+<!-- Nota: Se pone el formulario aquí abajo y no encima de las zonas, ya que arriba no está declarada la variable $zone -->
+<!-- Para depurar, quita hidden del input que guarda los ids de las zonas en orden  -->
+<form id="addPosition" action="{{ route('zone.zonesPosition', isset($zone->id)?$zone->id:'') }}" method="post">
+    @csrf
+    <!-- Por defecto null, para saber si mandar petición al servidor -->
+    <input id="position" type="text" name="position" value="null" style="width: 500px;" hidden>
+</form>
 
 <script>
     //RUTAS NECESARIAS PARA ARCHIVO EXTERNO .js

@@ -4,58 +4,30 @@
 //IdType corresponde al id del recurso de asociado a traves de la tabla intermedia
 function audio(id, idType){
 
+    var codigoHTML = "<div id='audio' class='hots"+id+" hotspotElement'>"+
+                        "<div class='icon_wrapper'>"+
+                         "<div class='icon'>"+
+                     "<div id='inner_icon' class='inner_icon'>";
+    if (idType == -1) {  // El hotspot es huérfano y le vamos a poner una clase especial para verlo
+        codigoHTML += "<svg version='1.1' class=huerfano id='audioIcon' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 384 384' style='enable-background:new 0 0 384 384;' xml:space='preserve'>"+
+                        "<g><path d='M288,192c0-37.653-21.76-70.187-53.333-85.867v171.84C266.24,262.187,288,229.653,288,192z'/>"+
+                        "<polygon points='0,128 0,256 85.333,256 192,362.667 192,21.333 85.333,128'/>"+
+                      "<path d='M234.667,4.907V48.96C296.32,67.307,341.333,124.373,341.333,192S296.32,316.693,234.667,335.04v44.053C320.107,359.68,384,283.413,384,192S320.107,24.32,234.667,4.907z'/></g>"+
+                    "</svg>";
+    } else {
+        codigoHTML += "<svg version='1.1' id='audioIcon' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 384 384' style='enable-background:new 0 0 384 384;' xml:space='preserve'>"+
+        "<g><path d='M288,192c0-37.653-21.76-70.187-53.333-85.867v171.84C266.24,262.187,288,229.653,288,192z'/>"+
+            "<polygon points='0,128 0,256 85.333,256 192,362.667 192,21.333 85.333,128'/>"+
+            "<path d='M234.667,4.907V48.96C296.32,67.307,341.333,124.373,341.333,192S296.32,316.693,234.667,335.04v44.053C320.107,359.68,384,283.413,384,192S320.107,24.32,234.667,4.907z'/></g>"+
+        "</svg>";
+
+    }               
+
+    codigoHTML += "<svg style='display:none;' id='closeIcon' enable-background='new 0 0 386.667 386.667' viewBox='0 0 386.667 386.667'  xmlns='http://www.w3.org/2000/svg'><path d='m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z'/></svg>"+
+    "</div></div></div><div class='content'><audio src=''controls></audio></div></div>";
+
     //AGREGAR HTML DEL HOTSPOT
-    $("#contentHotSpot").append(
-        "<div id='audio' class='hots"+id+" hotspotElement'>"+
-        "<div class='icon_wrapper'>"+
-            "<div class='icon'>"+
-            "<div id='inner_icon' class='inner_icon'>"+
-                "<svg version='1.1' id='audioIcon' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 384 384' style='enable-background:new 0 0 384 384;' xml:space='preserve'>"+
-                "<g><path d='M288,192c0-37.653-21.76-70.187-53.333-85.867v171.84C266.24,262.187,288,229.653,288,192z'/>"+
-                    "<polygon points='0,128 0,256 85.333,256 192,362.667 192,21.333 85.333,128'/>"+
-                    "<path d='M234.667,4.907V48.96C296.32,67.307,341.333,124.373,341.333,192S296.32,316.693,234.667,335.04v44.053C320.107,359.68,384,283.413,384,192S320.107,24.32,234.667,4.907z'/></g>"+
-                "</svg>"+
-                
-                "<svg style='display:none;' id='closeIcon' enable-background='new 0 0 386.667 386.667' viewBox='0 0 386.667 386.667'  xmlns='http://www.w3.org/2000/svg'><path d='m386.667 45.564-45.564-45.564-147.77 147.769-147.769-147.769-45.564 45.564 147.769 147.769-147.769 147.77 45.564 45.564 147.769-147.769 147.769 147.769 45.564-45.564-147.768-147.77z'/></svg>"+
-            "</div>"+
-            "</div>"+
-        "</div>"+
-        "<div class='content'>"+
-            "<audio src='' controls></audio>"+
-        "</div>"+
-        "</div>"
-    );            
-
-    //ESTABLECER INICIALMENTE EL VIDEO AL IFRAME
-    getAudios()
-        .done(function(json){
-            //Comprobar si es la primera instanciacion del hotspot (Creacion)
-            if(idType==-1){
-                //Asociar por defecto con el ultimo recurso del tipo agregado a la base de datos
-                updateIdType(json[json.length-1].id)
-                    .done(function(){
-                        idType=json[json.length-1].id;
-                        setVideoIframe(json);
-                    });
-            }else{
-                //Si no es su creacion cargamos directamente el video
-                setVideoIframe(json);
-            }
-        });  
-    
-    //------------------------------------------------------------------------------------------------------
-
-    /**
-     * METODO PARA ESTABLECER EL VIDEO DE VIMEO EN EL IFRAME
-     */
-    function setVideoIframe(json){
-        //Obtener la ruta del video de vimeo
-        for(var i=0;i<json.length; i++){
-            if(json[i].id==idType){
-                $(".hots"+id+" audio").attr('src', indexUrl+"/"+json[i].route);
-            }
-        }
-    }
+    $("#contentHotSpot").append(codigoHTML);        
 
     //----------------------------------------------------------------------
 
@@ -199,9 +171,7 @@ function audio(id, idType){
 
     //--------------------------------------------------------------------
     
-    /**
-     * METODO PARA MOSTRAR LAS MINIATURAS PARA CADA AUDIO
-     */
+    /* METODO PARA MOSTRAR LAS MINIATURAS PARA CADA AUDIO */
     function showPreviewAudios(){
         //Quitar elemento seleccionado
         $('#resourcesList .previewAudio img').removeClass('audioSelected');
@@ -247,15 +217,13 @@ function audio(id, idType){
            $("#resourcesList .load").hide();
            $("#resourcesList .content").show();
             //Mover automaticamente al video marcado
-            $('#resourcesList .content').scrollTop($('#resourcesList #'+idType+" img").offset().top-100);
+            //$('#resourcesList .content').scrollTop($('#resourcesList #'+idType+" img").offset().top-100);
         });  
     }
 
     //---------------------------------------------------------------------------------------------
 
-    /*
-     * METODO PARA ACTUALIZAR EL VIDEO ASOCIADO AL HOTSPOT EN LA TABLA INTERMEDIA
-     */
+    /* METODO PARA ACTUALIZAR EL VIDEO ASOCIADO AL HOTSPOT EN LA TABLA INTERMEDIA */
     function updateIdType(newIdType){
         //Obtener listado de todos los videos disponibles en la base de datos
         return $.ajax({
@@ -280,9 +248,7 @@ function audio(id, idType){
 
     //--------------------------------------------------------------------
 
-    /*
-     *METODO PARA OBTENER TODOS LOS VIDEOS DISPONIIBLES EN RECURSOS DE LA BASE DE DATOS
-     */
+    /* METODO PARA OBTENER TODOS LOS VIDEOS DISPONIIBLES EN RECURSOS DE LA BASE DE DATOS */
     function getAudios(){
         //Obtener listado de todos los videos disponibles en la base de datos
         return $.ajax({
@@ -297,6 +263,35 @@ function audio(id, idType){
 
     //--------------------------------------------------------------------
      
+    //Código para asignar automáticamente un recurso, comentado por si se desea volver a la asignación automática
+   /* //ESTABLECER INICIALMENTE EL VIDEO AL IFRAME
+    getAudios()
+        .done(function(json){
+            //Comprobar si es la primera instanciacion del hotspot (Creacion)
+            if(idType==-1){
+                //Asociar por defecto con el ultimo recurso del tipo agregado a la base de datos
+                updateIdType(json[json.length-1].id)
+                    .done(function(){
+                        idType=json[json.length-1].id;
+                        setVideoIframe(json);
+                    });
+            }else{
+                //Si no es su creacion cargamos directamente el video
+                setVideoIframe(json);
+            }
+        });
+    
+    //------------------------------------------------------------------------------------------------------
+
+   //METODO PARA ESTABLECER EL VIDEO DE VIMEO EN EL IFRAME
+    function setVideoIframe(json){
+        //Obtener la ruta del video de vimeo
+        for(var i=0;i<json.length; i++){
+            if(json[i].id==idType){
+                $(".hots"+id+" audio").attr('src', indexUrl+"/"+json[i].route);
+            }
+        }
+    } */
 
 
 }

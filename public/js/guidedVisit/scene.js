@@ -24,7 +24,13 @@ $(function() {
         update: function(){ 
             var ordenElementos = $(this).sortable("toArray").toString();
             $('#position').val(ordenElementos).change();
-            document.getElementById("btn-savePosition").disabled = false; 
+            //document.getElementById("btn-savePosition").disabled = false; 
+            
+            /**
+             * Depuración JS
+             */
+            //var orden = $('#position').val();
+            //alert(orden); // Variable donde se guardan las posiciones (JS) aún no están en la BD
         },
 
         // Deshabilita los controles del audio ya que se queda pillado al intentar ordenar
@@ -35,23 +41,30 @@ $(function() {
         // Se habilitan los controles de audio
         stop: function(event, ui){
             $("tr[id="+ui.item[0].id+"] audio").attr("controls", "true");
+            
+            // Guarda la posición
+            if($('#position').val() == 'null'){
+                // Acción cuando no hay posiciones nuevas
+            } else {
+                $.post($("#addPosition").attr('action'), {
+                    _token: $('#addPosition input[name="_token"]').val(),
+                    position: $('#position').val()
+                }).done(function(data){
+                    //alert('Posición guardada');
+                    alertify.success('Posición guardada', 5); 
+                }).fail( function() {
+                    alertify.error('Error al guardar la posición', 5); 
+                });   
+            }
         }
     });
 
+    /*
     // Boton que guarda la posición
     $('#btn-savePosition').click(function(){
-        if($('#position').val() == 'null'){
-            // Acción cuando no hay posiciones nuevas
-        } else {
-            $.post($("#addPosition").attr('action'), {
-                _token: $('#addPosition input[name="_token"]').val(),
-                position: $('#position').val()
-            }).done(function(data){
-                alert('Posición guardada')
-            });    
-        }
-    })
-
+        
+    });
+    */
 
     //----------------------------------------------------  Ventanas modales  --------------------------------------------------------------------------
 

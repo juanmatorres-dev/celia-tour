@@ -65,6 +65,16 @@ $().ready(function(){
                     $('#errorMessagge > span').text('Tiene que seleccionar una imagen');
                     $('#name').css('border', '1px solid black');
                 }
+
+                var name = image;
+                var pointPosition = image.indexOf('.');
+                var extension = image.substr(pointPosition);
+                if(extension != ".jpg" && extension != ".JPG" && extension != ".png" && extension != ".jpeg"){
+                    event.preventDefault()
+                    $('#errorMessagge > span').text('Tiene que seleccionar un archivo válido de imagen');
+                    $('#zoneName').css('border', '1px solid black');
+                }
+
             }
         //Si el nombre estuviese vacío, se detiene el evento submit y se lanza un mensaje de error
         }else{
@@ -114,9 +124,13 @@ $().ready(function(){
             // Al cambiar la lista se guardan todos los id en un input hidden
             update: function(){ 
                 var ordenElementos = $(this).sortable("toArray").toString(); // Guarda los ids de zonas nativo (zone2,zone3,zone1)
-                var ordenElementos_js; // Guarda los ids de zonas limpios (2,3,1) con la coma incluida
+                var ordenElementos_js = ""; // Guarda los ids de zonas limpios (2,3,1) con la coma incluida
                 
-                alert(ordenElementos);
+                /**
+                 * Depuración JS
+                 * 
+                 */
+                //alert(ordenElementos);
                 //alert(ordenElementos.length);
                 //alert(ordenElementos.substring(4,5));
 
@@ -124,47 +138,43 @@ $().ready(function(){
                 * Recorre el String obtenido por el método sortable de JQueryUi
                 * Ejemplo del String que recorre : zone2,zone3,zone1
                 */
+                
+                var ordenElementosAcortados = ordenElementos;
 
                 for (let i = 0; i < ordenElementos.length; i++) {
 
-                    //alert(ordenElementos.substring(1,4));
-                    /**
-                     * Obtiene el primer id de zonas
-                     */
-                    if(i == 4){
-                        alert(ordenElementos.substring(4,5));
-                        ordenElementos_js = ordenElementos.substring(4,5) + ",";
-                    }
-                  
-                    /**
-                     * Obtiene el resto de ids (después del primero)
-                     */
-                    if(i > 4){
-                        var texto = ordenElementos.substring(i,(i+1));
-                        if(texto == ','){
-                            //alert("Hay coma");
-                           
-                            alert(ordenElementos.substring((i+5),((i+4)+2)));
-                            ordenElementos_js += ordenElementos.substring((i+5),((i+4)+2)) + ","; // Concatena los ids con la coma
-                            
+                    //alert("⚡" + ordenElementos.charAt(i));
+                    
+                    if(ordenElementos.charAt(i) == ','){
+                        console.log(ordenElementosAcortados);
+                        
+                       
+                        //alert("=> " + ordenElementosAcortados.substring((4),((ordenElementosAcortados.indexOf(','))+1)));
+                        ordenElementos_js = ordenElementos_js + ordenElementosAcortados.substring((4),((ordenElementosAcortados.indexOf(','))+1));
+                        ordenElementosAcortados = ordenElementos.substring((i + 1),ordenElementos.length);
+                        
+                       
+                        
+                        //alert(ordenElementosAcortados);
+                        //alert("😎" + ordenElementosAcortados.indexOf(','));
+
+                        if(ordenElementosAcortados.indexOf(',') == -1){
+                            //alert("=> " + ordenElementosAcortados.substring((4),ordenElementosAcortados.length));
+                            ordenElementos_js = ordenElementos_js + ordenElementosAcortados.substring((4),ordenElementosAcortados.length);
                         }
+
                     }
 
-                    /**
-                     * Borra la coma final del String
-                     * 2,3,1, => 2,3,1
-                     */
-                    if(i == (ordenElementos.length - 1)){
-                        ordenElementos_js = ordenElementos_js.substring(0, (ordenElementos_js.length - 1));
-                    }
                 }
-
-                alert(ordenElementos_js);
                 
+                /**
+                 * Depuración JS
+                 * alert(ordenElementos_js);
+                 */
 
                 //$('#position').val(ordenElementos).change();
                 $('#position').val(ordenElementos_js).change();
-                
+
                 //document.getElementById("btn-savePosition").disabled = false; 
                 
                 var orden1 = $('#position').val();
@@ -174,11 +184,29 @@ $().ready(function(){
             // Deshabilita los controles del audio ya que se queda pillado al intentar ordenar
             start: function(event, ui){
                 //$("div[id="+ui.item[0].id+"]").css('display', 'none');
+                //alert("Arrastrando 😎");
             },
             
             // Se habilitan los controles de audio
             stop: function(event, ui){
                 //$("tr[id="+ui.item[0].id+"] audio").attr("controls", "true");
+                //alert("Listo ✔");
+
+                // Guarda la posición
+                if ($('#position').val() == 'null') {
+                    // Acción cuando no hay posiciones nuevas
+                } else {
+                    //alertify.message('Guardando posición ... ', 5);
+                    $.post($("#addPosition").attr('action'), {
+                        _token: $('#addPosition input[name="_token"]').val(),
+                        position: $('#position').val()
+                    }).done(function (data) {
+                        //alert('Posición guardada'); 
+                        alertify.success('Posición guardada', 5); 
+                    }).fail( function() {
+                        alertify.error('Error al guardar la posición', 5); 
+                    });
+                }
             }
         });
 

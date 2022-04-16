@@ -24,10 +24,16 @@ class ZoneController extends Controller
     public function index(){
         $zones = DB::table('zones')->orderBy('position')->get();
         $data["zones"] = $zones;
+        //$data['zones'] = Zone::all();
         $data['rows'] = DB::table('zones')->count();
+        
+        $num_scenes = DB::select('SELECT COUNT(scenes.id) AS num_scenes FROM zones LEFT JOIN scenes ON zones.id = scenes.id_zone GROUP BY zones.id, scenes.id_zone ORDER BY zones.position;');
+
+        $data["num_scenes"] = $num_scenes;
+
         //echo("Número de zonas ▶ ". DB::table('zones')->count());
         //echo("Número de escenas ▶ ". DB::table('scenes')->count());
-        return view('backend/zone/index', $data, ['numberOfZones'=>DB::table('zones')->count()] );
+        return view('backend/zone/index', $data, ['numberOfZones'=>DB::table('zones')->count()]);
         // Con lo que hay después de $data, estamos enviando a la vista index de zonas el número total de zonas que hay en la BD
     }
 
@@ -151,9 +157,11 @@ class ZoneController extends Controller
                 $allZones[$i]->save();
             }
         }
-        Storage::disk('zoneimage')->delete($zone->file_image);
-        Storage::disk('zoneminiature')->delete($zone->file_miniature);
-        if($zone->delete()){
+        
+        $result = $zone->delete();
+        if($result){
+            Storage::disk('zoneimage')->delete($zone->file_image);
+            Storage::disk('zoneminiature')->delete($zone->file_miniature);
             return response()->json(['status' => true]);
         }else{
             return response()->json(['status' => false]);
@@ -170,6 +178,8 @@ class ZoneController extends Controller
     public function updatePosition($opc){
         $movement = substr($opc, 0, 1);
         $id = substr($opc, 1);
+        //echo "$opc";
+        //echo "😎 $id";
         $movedZone = Zone::find($id);
         $newPosition = null;
         if($movement == 'u'){
@@ -185,8 +195,51 @@ class ZoneController extends Controller
         $displacedZone->position = $savePosition;
         $movedZone->save();
         $displacedZone->save();
+
         return redirect()->route('zone.index');
     }
+
+
+
+    /**
+     * ACTUALIZAR LA LISTA DE POSICIONES DE LAS ZONAS (POR AJAX)
+     */
+    public function zonesPosition(Request $request, $id)
+    {
+        // Se pasa el orden a array
+        // [1][3][,][2]
+        $string = str_split($request->position);
+
+        // Se eliminan las comas y se guardan las posiciones correctamente
+        // [13][2]
+        $i = 0;
+        $position = array();
+        foreach ($string as $value) {
+            if($value != ','){
+
+                if(isset($position[$i])) {
+                    $position[$i] = ( $position[$i] . $value );
+                } else {
+                    $position[$i] = $value;
+                } 
+
+            } else {
+                $i++;
+            }
+        }
+
+        // Actualiza las posiciones de las escenas
+        for ($j=0; $j < count($position) ; $j++) {
+
+            DB::table('zones')
+            ->where('id', $position[$j])
+            ->update(['position' => ($j+1)]);
+            
+        }
+    }
+
+
+
 
     //---------------------------------------------------------------------------------------
 
