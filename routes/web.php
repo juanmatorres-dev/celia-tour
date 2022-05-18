@@ -40,10 +40,14 @@ Route::resource('guidedVisit', 'GuidedVisitController')->except([
     'show', 'update', 'destroy'
 ]);
 
+/////////////// Visualizar Modelos 3D ////////////////
+Route::post('model3d/getname/{id}', 'FrontendController@getName')->name('model3d.getname');
+Route::get('model3d/view/{name}', 'FrontendController@visualizarModelos3D')->name('model3d.view');
+
 /////////////// RESTfull Recursos ////////////////
 Route::post('resources/deleteSubtitle', 'ResourceController@deleteSubtitle')->name('resource.deleteSubtitle');
 Route::post('resources/getmodel3d', 'ResourceController@getModel3D')->name('resource.getmodel3d');
-Route::get('resources/getnamemodel3d/{id}', 'ResourceController@getNameModel3D')->name('resource.getnamemodel3d');
+Route::post('resources/getnamemodel3d/{id}', 'ResourceController@getNameModel3D')->name('resource.getnamemodel3d');
 Route::post('resources/getvideos', 'ResourceController@getVideos')->name('resource.getvideos');
 Route::post('resources/getaudios', 'ResourceController@getAudios')->name('resource.getaudios');
 Route::get('resources/getroute/{id}', 'ResourceController@getRoute')->name('resource.getroute');

@@ -1,4 +1,7 @@
 /* GENERAL */
+body{
+    overflow: auto;
+}
 div{	
 	/* Limitar tamanno */
 	box-sizing:border-box; 
@@ -120,8 +123,8 @@ div{
 /************* VISITA LIBRE *************/
 
 #sScenesButton{
-    top: 20;
-    right: 37;
+    top: 20px;
+    right: 37px;
     width: 3%;
     cursor: pointer;
 }

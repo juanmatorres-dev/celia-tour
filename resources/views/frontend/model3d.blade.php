@@ -2,43 +2,44 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" type="text/css" href="css/style.css">
-        <title>Cargando modelo IES Celia Viñas 3D</title>
+        <link rel="stylesheet" type="text/css" href='{{url('css/model3d/model3d.css')}}'>
+        <title>Cargando modelo {{$name}}</title>
     </head>
     <body>
+
+        <div id="info">
+            <p>Modelo 3D: {{$name}}</p>
+        </div>
+
+        <div id="leyenda">
+            <p>Girar Modelo: </p><img src="{{url('/img/RatonIzquierdo.png')}}">
+            <p>Zoom: </p><img src="{{url('/img/RatonRuleta.png')}}">
+            <p>Desplazar pantalla: </p><img src="{{url('/img/RatonDerecho.png')}}">
+        </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r119/three.min.js"></script>
-        <script src="js/GLTFLoader.js"></script>
-        <script src="js/OrbitControls.js"></script>
+        <script src="{{url('/js/model3d/GLTFLoader.js')}}"></script>
+        <script src="{{url('/js/model3d/OrbitControls.js')}}"></script>
 
         <script>
-
-            /**
-            * Función que extrae el id de la url
-            */
-            function getParameterByName(name, url = window.location.href) {
-                name = name.replace(/[\[\]]/g, '\\$&');
-                var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                    results = regex.exec(url);
-                if (!results) return null;
-                if (!results[2]) return '';
-                return decodeURIComponent(results[2].replace(/\+/g, ' '));
-            }
 
             var scene, camera, renderer, controls;
 
             scene = new THREE.Scene();
-            //Cambia el color de fondo de la escena
+            //CAMBIA EL COLOR DE FONDO DE LA ESCENA
             scene.background = new THREE.Color(0x999999);
 
+            //POSICIÓN DE LA CÁMARA
             camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight);
             camera.position.set(0,0,2);
             scene.add(camera);
 
+            //SE RENDERIZA EL MODELO 3D
             renderer = new THREE.WebGLRenderer();
             renderer.setSize(window.innerWidth,window.innerHeight);
             document.body.appendChild(renderer.domElement);
 
-            //ROTAMOS EL MARTILLO
+            //ROTAMOS EL MODELO 3D
             controls = new THREE.OrbitControls(camera, renderer.domElement);
 
             controls.minDistance = 3;
@@ -52,11 +53,12 @@
             controls.screenSpacePanning = true;
 
 
-            //Cargamos el martillo
+            //CARGAMOS EL MODELO 3D
             const loader = new THREE.GLTFLoader();
-            var name = getParameterByName('name');          
-            
-            loader.load('../../img/resources/'+name, function (glb) {
+            var name = "{{$name}}";
+            var url = "{{url('/img/resources/')}}";
+
+            loader.load(url+'/'+name, function (glb) {
 
                 console.log(glb.scene.children.material);
                 const root = glb.scene;
@@ -70,8 +72,6 @@
                 //Lo añadimos
                 scene.add(root);
 
-
-
             }, function (xhr){
                 console.log((xhr.loaded/xhr.total * 100) + "% loaded")
             }, function (error){
@@ -79,7 +79,7 @@
             })
 
 
-            //Añadimos luz a la escena
+            //AÑADIMOS LUZ A LA ESCENA
             const dirLight1 = new THREE.DirectionalLight( 0xffffff );
             dirLight1.position.set( 0, 3, 2 );
             scene.add( dirLight1 );
@@ -90,13 +90,17 @@
 
             const ambientLight = new THREE.AmbientLight( 0x222222 );
             scene.add( ambientLight );
-
+            
+            /**
+             * MÉTODO QUE MUESTRA FINALMENTE EL MODELO 3D CON LA COMPOSICIÓN
+             * DE ESCENA Y CÁMARA PROGRAMADAS MÁS ARRIBA
+             */
             function animate () {
                 requestAnimationFrame(animate);
                 renderer.render(scene,camera);
             }
 
-            animate()
+            animate();
         </script>
     </body>
 </html>
