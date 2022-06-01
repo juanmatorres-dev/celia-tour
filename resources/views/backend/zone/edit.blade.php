@@ -232,7 +232,7 @@
             @endforeach
             <input id="url" type="hidden" value="{{ url('img/zones/icon-zone.png') }}">
             <input id="urlhover" type="hidden" value="{{ url('img/zones/icon-zone-hover.png') }}">
-            <img id="zoneimg" width="100%" src="{{ url('img/zones/images/'.$zone->file_image) }}" alt="">
+            <img id="zoneimg" width="100%" src="{{ url('img/zones/images/'.$zone->file_image) }}?nocache=<?php echo time(); ?>" alt="">
         </div>
     </div>
 
@@ -1001,7 +1001,7 @@
 
             setTimeout(() => {
                 loading.close();
-                //rotarImagen();
+                rotarImagen();
             }, 2000);
         }
     }
@@ -1019,39 +1019,20 @@
             data: {
                 "_token": "{{ csrf_token() }}",
                 'numScenesInTheZone': numeroDeEscenasEnLaZona,
-                'id': sceneId,
-                'top': nuevoTop,
-                'left': nuevoLeft,
+                'id': JSON.stringify(sceneId),
+                'top': JSON.stringify(nuevoTop),
+                'left': JSON.stringify(nuevoLeft),
             },
             success: function(data) {
-                alert(data);
+                alertify.notify('Guardado 👍', 5);
+                console.log(data);
             },
-            error: function() {
+            error: function(response) {
                 //alert('Error AJAX');
+                alert(route + " returns a " + response.status);
+                console.log(respomse);
                 alertify.error('Error al guardar las posiciones', 5);
             }
-            /*
-                        success: function(result) {
-                            
-                            if (result['status']) {
-                                modify = false;
-                                
-                                $('#scene' + sceneId).removeClass('onMovement');
-                                $('#menuMovePoint').hide();
-                                $('.scenepoint').css('cursor', 'pointer');
-                                $('#menuModalUpdateScene').show();
-                                $('#secondaryScenesList').show();
-                                
-                            } else {
-                                alert('Error Controlador');
-                            }
-                        
-                        }, */
-            /*
-            error: function() {
-                alert('Error AJAX');
-            }
-            */
         });
     }
 
